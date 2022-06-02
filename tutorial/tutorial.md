@@ -252,3 +252,4 @@ app.whenReady().then(() => {
 ---
 
 ## Full Setup of Electron + React App
+Now that we have a better idea of how Electron works, we're going to create an Electron App that makes use of React. Since Electron 
