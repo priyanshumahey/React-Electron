@@ -379,11 +379,104 @@ For this tutorial, the folder we create it in will be called method2. We can cre
 If we create the folder method2 first, we can add React to that folder using:
 ``` PS
 npx create-react-app .
-``
-`
+```
+But we can also create the folder using React by replacing the dot with a name:
+``` PS
+npx create-react-app method2
+```
+Then to start the React app, we use 
+``` PS
+cd method2
+npm start
+```
+This creates boilerplate react code and using npm start will start a localhost server for us to use.
 
+&nbsp;
 
+**Setting Up Electron**
 
+Inside of our folder, we'll downlaod Electron.js into the folder. We're going to install Electron.js using 
+``` PS
+npm i electron
+```
+
+Then, inside of method2, we'll see a folder called public. Inside of that folder, we'll create a file called `main.js` which will hold the main process. 
+
+Inside of `main.js`, we'll place some template Electron code.
+```JS
+
+const { app, BrowserWindow } = require('electron')
+
+function createWindow () {
+  // Create the browser window.
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
+
+  //load the index.html from a url
+  win.loadURL('http://localhost:3000');
+
+  // Open the DevTools.
+  win.webContents.openDevTools()
+}
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(createWindow)
+
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  // On macOS it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow()
+  }
+})
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+```
+Then, we'll open up package.json. More information about this file [here](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). 
+
+Inside of `package.json`, you'll need to make an entry way for the `main.js` file. Inside of the code, add:
+``` JSON
+"main":"public/main.js"
+```
+So the code will end up looking like:
+``` JSON
+  "name": "method2",
+  "version": "0.1.0",
+  "private": true,
+  "main":"public/main.js",
+```
+We add `electron-dev` as an entry with the value of `electron .` within the scripts of package.json.
+``` JSON
+"electron-dev": "electron ."
+```
+The code will look as such:
+``` JSON
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron-dev": "electron ."
+  },
+```
 
 
 
