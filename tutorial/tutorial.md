@@ -136,6 +136,8 @@ React is a front-end library for building user interfaces. It's open-source and 
 --- 
 
 ## Starting off (Setting Up Electron w/o React)
+**This turtorial is based around Electron quickstart. The code is under method 1.**
+
 The first part of this tutorial is dedicated to explaining how you would set up Electron. This will only allow you to work with HTML/CSS/JS and not React. We need to start off by creating a folder and initializing an npm package.
 ``` PS
 mkdir Method1
@@ -235,17 +237,129 @@ app.whenReady().then(() => {
 
 **Manage your window's lifecycle**
 
+You need to use additional boilerplate code for the application to work better on the specific platforms/OS. In general, you can use the `process` global's `platform` attribute to run code specifically for certain operating systems.
+
+On Windows and Linux, exiting all windows generally quits an application entirely. To implement this, listen for the `app` module's `window-all-closed` event, and call `app.quit()`if the user is not on macOS (`darwin`).
+``` JS
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})
+```
+Linux and Windows apps quit when there are no windows open and they generally continue running even without any windows open, and activating the app when no windows are avaialble should open a new one.
+
+The code listens for the `app` module's `activate` event, and call your existing `createWindow()` method if no browser windows are open. Windows cannot be created before the `ready` event so you have to listen for `activate` events after your app is initialized. The code will look as such:
+``` JS
+app.whenReady().then(() => {
+  createWindow()
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+```
+
 &nbsp;
 
 **Access Node.js from the renderer with a preload script**
+
+We attach a preload script to your renderer comes in handy. A preload script runs before the renderer process is loaded and has access to both rendere globals (e.g. `window` and `document`) and a Node.js environment.
+
+We create a new script called `preload.js` and add in the following code:
+``` JS
+window.addEventListener('DOMContentLoaded', () => {
+  const replaceText = (selector, text) => {
+    const element = document.getElementById(selector)
+    if (element) element.innerText = text
+  }
+
+  for (const dependency of ['chrome', 'node', 'electron']) {
+    replaceText(`${dependency}-version`, process.versions[dependency])
+  }
+})
+```
+This code accessed the Node.js `process.versions` and runs a basic `replaceText` helper function to insert the version numbers into the HTML document. 
+
+To attach this script to your renderer process, pass in the path to your preload script to the `webPreferences.preload` option in your existing `BrowserWindow` constructor.
+``` JS
+// include the Node.js 'path' module at the top of your file
+const path = require('path')
+
+// modify your existing createWindow() function
+const createWindow = () => {
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+
+  win.loadFile('index.html')
+}
+// ...
+```
+In this, there are two important concepts from Node.js here.
+- The `_dirname_` string points to the path of the currently executing script (in this case, your project's root folder)
+- The `path.join` API joins multiple path segments together, creating a combined path string that works across all platforms
 
 &nbsp;
 
 **Add functionality to your web contents**
 
+To add additional functionality to the web contents, you need to add scripts to the renderer process. The renderer process runs in a normal web environment, you can add a `<script>` tag right before your `index.html` file's closing `</body>` tag to include any arbitrary scripts you want:
+``` html
+<script src="./renderer.js"></script>
+```
+The code contained in `renderer.js` can use JavaScript APIs and tooling you use for typical front-end development.
+
 &nbsp;
 
 **Package and distribute your application**
+
+The best way to package and distribute Electron apps is through the use of Electron Forge which is a complete tool for creating, publishing, and installing modern Electron applications. 
+
+1. Add Electron Forge as a development dependency of your app, and use its `import` command to set up Forge's scaffolding:
+``` PS
+npm install --save-dev @electron-forge/cli
+npx electron-forge import
+
+✔ Checking your system
+✔ Initializing Git Repository
+✔ Writing modified package.json file
+✔ Installing dependencies
+✔ Writing modified package.json file
+✔ Fixing .gitignore
+
+We have ATTEMPTED to convert your app to be in a format that electron-forge understands.
+
+Thanks for using "electron-forge"!!!
+``` 
+2. Create a distributable using Forge's `make` command:
+
+``` PS
+npm run make
+
+> my-electron-app@1.0.0 make /my-electron-app
+> electron-forge make
+
+✔ Checking your system
+✔ Resolving Forge Config
+We need to package your application before we can make it
+✔ Preparing to Package Application for arch: x64
+✔ Preparing native dependencies
+✔ Packaging Application
+Making for the following targets: zip
+✔ Making for target: zip - On platform: darwin - For arch: x64
+```
+Electron Forge will create the `out` folder where the pacakge will be located
+``` PS
+// Example for macOS
+out/
+├── out/make/zip/darwin/x64/my-electron-app-darwin-x64-1.0.0.zip
+├── ...
+└── out/my-electron-app-darwin-x64/my-electron-app.app/Contents/MacOS/my-electron-app
+``` 
+
 
 &nbsp;
 
