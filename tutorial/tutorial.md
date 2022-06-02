@@ -483,6 +483,7 @@ And that's basically it!
 &nbsp;
 
 **Running the Program**
+
 In the powershell, we will need use both commands:
 ``` PS
 npm start
@@ -490,9 +491,3 @@ npm start
 ``` PS
 npm run electron-dev
 ```
-&nbsp;
-
-&nbsp;
-
-&nbsp;
-
