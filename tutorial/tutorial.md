@@ -366,4 +366,33 @@ out/
 ---
 
 ## Full Setup of Electron + React App
-Now that we have a better idea of how Electron works, we're going to create an Electron App that makes use of React. Since Electron 
+Now that we have a better idea of how Electron works, we're going to create an Electron App that makes use of React. Since Electron can make use of JavaScript, it'll be able to make use of Front-End programs like React, Vue, Angular, etc.
+
+&nbsp;
+
+**Starting off**
+
+To start off, we'll create a folder with a React app inside of it. It is easier to start off with React and move onto implementing in Electron rather than vice versa.
+
+For this tutorial, the folder we create it in will be called method2. We can create the folder first and then implement React into it or we can get React to do it for us.
+
+If we create the folder method2 first, we can add React to that folder using:
+``` PS
+npx create-react-app .
+``
+`
+
+
+
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
